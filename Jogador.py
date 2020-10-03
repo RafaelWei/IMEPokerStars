@@ -5,6 +5,9 @@ class Jogador:
         self.mao=[]
         self.qtdFichas=qtdFichas
 
+    def __repr__(self):
+        return "("+ str(self.checar_melhor_mao()[0])+","+str(self.checar_melhor_mao()[1])+")"
+
     def adicionar_carta(self,carta):
         self.mao.append(carta)
 

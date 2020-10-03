@@ -167,8 +167,10 @@ def carta_alta(cartas):
 #funcao que aponta o resultado de um conjunto de cartas
 def jogar(cartas):
     jogo=max(Par_Trinca_Quadra(cartas),Flush(cartas),sequencia(cartas),carta_alta(cartas))
-    print(resultados[jogo])
-    print(cartas_resultados[jogo])
-    return (cartas_resultados[jogo], resultados.index(resultados[jogo]))
+    aux1=cartas_resultados[jogo].copy()
+    aux2=resultados.index(resultados[jogo])
+    for lista in cartas_resultados:
+        lista.clear()
+    return (aux1,aux2)
 
 

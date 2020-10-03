@@ -2,7 +2,7 @@ from Jogador import Jogador
 from Baralho import Baralho
 
 def ordenar_jogadores(jogador):
-    return jogador.checar_melhor_mao()[1]
+    return  jogador.checar_melhor_mao()[1]
 
 class Mesa:
     def __init__(self,qtdJogadores):
@@ -10,7 +10,6 @@ class Mesa:
         self.qtdJogadores=qtdJogadores
         self.jogadores=[]
         self.pot=0
-
     def distribuir_cartas(self):
         for i in range(0,2):
             for jogador in self.jogadores:
@@ -24,10 +23,8 @@ class Mesa:
                 jogador.adicionar_carta(carta_da_vez)
 
     def checa_vencedor(self):
-        #jogadores_ordenados=self.jogadores.sort(key=ordenar_jogadores, reverse=True)
-        for jogador in self.jogadores:
-            print((jogador.checar_melhor_mao()[0],jogador.checar_melhor_mao()[1]))
-        print('\n')
+        self.jogadores.sort(key=ordenar_jogadores, reverse=True)
+        return self.jogadores
         #FALTA IMPLEMENTAR DESEMPATE
 
     def adicionar_jogador(self,jogador):

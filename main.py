@@ -10,4 +10,4 @@ if __name__ == '__main__':
         mesa.adicionar_jogador(Jogador(nome,500))
     mesa.distribuir_cartas()
     mesa.colocar_cartas_mesa()
-    mesa.checa_vencedor()
+    print(mesa.checa_vencedor())

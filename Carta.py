@@ -3,6 +3,8 @@ class Carta():
     def __init__(self,valor,naipe): #construtor
         self.valor=valor
         self.naipe=naipe
+        self.imagem=str(self.valor)+str(self.naipe)
+
     def __str__(self): #para poder printar uma carta
         return self.valor +self.naipe
     def __repr__(self): #para poder gerar uma string que representa uma carta

@@ -1,8 +1,8 @@
-from Jogador import Jogador
 from Baralho import Baralho
-
+valores=['2','3','4','5','6','7','8','9','10','J','Q','K','A']
+naipes=["♥","♦","♠","♣"]
 def ordenar_jogadores(jogador):
-    return  jogador.checar_melhor_mao()[1]
+    return jogador.valor_mao
 
 class Mesa:
     def __init__(self,qtdJogadores):
@@ -23,11 +23,38 @@ class Mesa:
                 jogador.adicionar_carta(carta_da_vez)
 
     def checa_vencedor(self):
+        for jogador in self.jogadores:
+            jogador.checar_melhor_mao()
         self.jogadores.sort(key=ordenar_jogadores, reverse=True)
-        return self.jogadores
-        #FALTA IMPLEMENTAR DESEMPATE
+        resultado=(self.jogadores[0]).valor_mao
+        empatados=[]
+        for jogador in self.jogadores:
+            if jogador.valor_mao==resultado:
+                empatados.append(jogador)
+            else:
+                break
+        if(len(empatados)>1):
+            vencedor=self.desempatar(empatados)
+        else:
+            vencedor=empatados[0]
+        print(self.jogadores)
+        return vencedor
 
     def adicionar_jogador(self,jogador):
         self.jogadores.append(jogador)
+
+    def desempatar(self,empatados):
+        for i in range (0,5):
+            valores_desempate=[]
+            for jogador in empatados:
+                valores_desempate.append(valores.index(jogador.mao[i].valor))
+            maximo=max(valores_desempate)
+            for jogador in empatados:
+                if valores.index(jogador.mao[i].valor)!=maximo:
+                    empatados.remove(jogador)
+            if len(empatados)==1:
+                return empatados[0]
+        return empatados
+
 
 

@@ -1,4 +1,3 @@
-#classe de uma carta
 class Carta():
     def __init__(self,valor,naipe): #construtor
         self.valor=valor

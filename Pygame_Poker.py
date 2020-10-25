@@ -50,7 +50,7 @@ def resultado(resultado_jogo):
     o_seu_resultado = fonte.render("O seu resultado foi:", 1, (4, 15, 133))
     resultado_mao = fonte.render(resultado_total, 1, (4, 15, 133))
     for carta in cartas:
-        cartas_resultado.append(pygame.image.load(f"{carta}.png"))
+        cartas_resultado.append(pygame.image.load(f"./PokerStarsIME_imgs/{carta}.png"))
     while (run):
         d = 150
         clock.tick(20)
@@ -81,10 +81,10 @@ def main(nome):
     clique=0
     for i in range(0, 2):
         for jogador in mesa.jogadores:
-            cartas_mao.append(pygame.image.load(f"{str(jogador.mao[i])}.png"))
+            cartas_mao.append(pygame.image.load(f"./PokerStarsIME_imgs/{str(jogador.mao[i])}.png"))
     for j in range(0, 5):
         for jogador in mesa.jogadores:
-            cartas_mesa.append(pygame.image.load(f"{str(jogador.mao[j + 2])}.png"))
+            cartas_mesa.append(pygame.image.load(f"./PokerStarsIME_imgs/{str(jogador.mao[j + 2])}.png"))
     while(run):
         clock.tick(60)
         for event in pygame.event.get():

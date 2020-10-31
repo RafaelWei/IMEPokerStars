@@ -33,7 +33,7 @@ def redrawGameWindow(texto_nome):
     for i in range(0,5):
         tela.blit(cartas_mesa[i],pos[i])
     pygame.display.update()
-#linha de comentario
+
 def resultado(resultado_jogo):
     clock = pygame.time.Clock()
     run=True

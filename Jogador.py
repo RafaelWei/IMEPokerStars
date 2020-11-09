@@ -4,6 +4,7 @@ class Jogador:
     def __init__(self,nome):
         self.nome=nome
         self.mao=[]
+        self.mao_objetos=[]
         self.qtdFichas=500
         self.valor_mao=-1
         self.valor_aposta=0
@@ -19,6 +20,12 @@ class Jogador:
         self.mao = tupla[0]
         self.valor_mao=tupla[1]
         return tupla
+
+    def devolver_cartas(self):
+        self.mao=[]
+        self.mao_objetos=[]
+        self.valor_mao=-1
+        self.valor_aposta=0
 
     #Vamos implementar depois
     def check(self):

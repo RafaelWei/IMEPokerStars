@@ -5,11 +5,13 @@ def ordenar_jogadores(jogador):
     return jogador.valor_mao
 
 class Mesa:
-    def __init__(self,qtdJogadores):
+    def __init__(self):
         self.baralho = Baralho()
-        self.qtdJogadores=qtdJogadores
         self.jogadores=[]
         self.pot=0
+        self.cartas_mesa=[]
+        self.cartas_mesa_objeto=[]
+
     def distribuir_cartas(self):
         for i in range(0,2):
             for jogador in self.jogadores:
@@ -21,6 +23,7 @@ class Mesa:
             carta_da_vez=self.baralho.sacar_carta()
             for jogador in self.jogadores:
                 jogador.adicionar_carta(carta_da_vez)
+            self.cartas_mesa.append(carta_da_vez)
 
     def checa_vencedor(self):
         for jogador in self.jogadores:
@@ -55,4 +58,10 @@ class Mesa:
             if len(empatados)==1:
                 return empatados[0]
         return empatados
+
+    def nova_rodada(self):
+        self.baralho=Baralho()
+        self.pot=0
+        self.cartas_mesa = []
+        self.cartas_mesa_objeto = []
 

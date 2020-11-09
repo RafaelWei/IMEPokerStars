@@ -8,9 +8,11 @@ class Mesa:
     def __init__(self):
         self.baralho = Baralho()
         self.jogadores=[]
+        self.jogadores_validos=[]
         self.pot=0
         self.cartas_mesa=[]
         self.cartas_mesa_objeto=[]
+        self.maior_aposta=0
 
     def distribuir_cartas(self):
         for i in range(0,2):
@@ -45,6 +47,7 @@ class Mesa:
 
     def adicionar_jogador(self,jogador):
         self.jogadores.append(jogador)
+        self.jogadores_validos.append(jogador)
 
     def desempatar(self,empatados):
         for i in range (0,5):
@@ -64,4 +67,6 @@ class Mesa:
         self.pot=0
         self.cartas_mesa = []
         self.cartas_mesa_objeto = []
+        self.maior_aposta=0
+        self.jogadores_validos=self.jogadores.copy()
 

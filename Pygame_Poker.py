@@ -26,20 +26,51 @@ moeda_objeto=(pygame.transform.scale(moeda_objeto,(51,75)))
 resultados=['Carta alta','Par','Dois pares','Trinca','Sequencia','Flush','Full House','Quadra','Straight Flush','Royal Flush']
 p=0
 
-def redrawGameWindow(texto_nome,texto_fichas,cartas_visiveis,jogador):
+def resultado_final(jogador,clock):
+    vencedor_texto = fonte_grande.render('Vencedor:', 1, (4, 5, 133))
+    nome_vencedor = fonte_grande.render(jogador.nome, 1, (4, 5, 133))
+    dinheiro_vencedor=fonte.render('Saldo final: '+str(jogador.qtdMoedas)+' moedas',1,(4,5,133))
+    run=True
+    while (run):
+        clock.tick(20)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+        tela.fill((35, 125, 90))
+        tela.blit(vencedor_texto, (250, 50))
+        tela.blit(nome_vencedor, (300, 150))
+        tela.blit(dinheiro_vencedor,(150,250))
+        pygame.display.update()
+
+def redesenhar_tela(texto_nome,texto_fichas,cartas_visiveis,jogador,mesa):
     tela.fill((35,125,90))
-    check.desenhar(tela)
+    if jogador.valor_aposta==mesa.maior_aposta:
+        check.desenhar(tela)
     fold.desenhar(tela)
     call.desenhar(tela)
-    raise_botao.desenhar(tela)
+    if mesa.maior_aposta>jogador.valor_aposta:
+        raise_botao.desenhar(tela)
     tela.blit(texto_nome,(20,280))
     tela.blit(texto_fichas, (80, 375))
     tela.blit(moeda_objeto,(20,315))
+    mesa_texto=fonte.render('Mesa:',1,(4,5,133))
+    tela.blit(mesa_texto,(5,5))
+    pote=fonte.render(str(mesa.pot), 1, (4, 15, 133))
+    tela.blit(pote,(135,8))
+    c=5
+    delta=64
+    for player in mesa.jogadores:
+        nome_aposta=fonte_muito_pequena.render(player.nome,1,(0,0,0))
+        tela.blit(nome_aposta,(620,c))
+        aposta=fonte_muito_pequena.render(str(player.valor_aposta),1,(0,0,0))
+        tela.blit(aposta,(620,c+3*delta//8))
+        c+=delta
     a=200
     b=300
-    d=150
+    d=100
     for carta in cartas_visiveis:
-        tela.blit(carta,(d,150))
+        tela.blit(carta,(d,100))
         d+=100
     for carta in jogador.mao_objetos:
         tela.blit(carta,(a,b))
@@ -96,14 +127,15 @@ def resultado(resultado_jogo,clock):
         pygame.display.update()
 
 def main(nomes,clock):
-    while len(nomes)>1:
+    njogadores = len(nomes)
+    mesa = Mesa()
+    for nome in nomes:
+        player = Jogador(nome)
+        mesa.adicionar_jogador(player)
+    while len(mesa.jogadores)>1:
+        acabou=False
         fase=0
         p=0
-        njogadores=len(nomes)
-        mesa = Mesa()
-        for nome in nomes:
-            player=Jogador(nome)
-            mesa.adicionar_jogador(player)
         mesa.distribuir_cartas()
         mesa.colocar_cartas_mesa()
         for i in range(0, 2):
@@ -111,38 +143,69 @@ def main(nomes,clock):
                 jogador.mao_objetos.append(pygame.image.load(f"./PokerStarsIME_imgs/{str(jogador.mao[i])}.png"))
         for j in range(0, 5):
             mesa.cartas_mesa_objeto.append(pygame.image.load(f"./PokerStarsIME_imgs/{str(mesa.jogadores[0].mao[j + 2])}.png"))
-        cartas_visiveis=[mesa.cartas_mesa_objeto[0],mesa.cartas_mesa_objeto[1],mesa.cartas_mesa_objeto[2]]
-        while fase!=3:
+        cartas_visiveis=[]
+        while fase!=4:
             jogador_atual=mesa.jogadores[p]
-            texto_nome = fonte_pequena.render(jogador_atual.nome, 1, (4, 15, 1))
-            texto_fichas = fonte_muito_pequena.render(str(jogador_atual.qtdFichas), 0, (4, 15, 133))
-            run = True
-            while(run):
-                clock.tick(60)
-                for event in pygame.event.get():
-                    if event.type==pygame.QUIT:
-                        pygame.quit()
-                        sys.exit()
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        posicao = pygame.mouse.get_pos()
-                        if check.clicar(posicao):
-                            run=False
-                        elif raise_botao.clicar(posicao):
-                            valor_raise=menu(1)
-                            if valor_raise!=0:
-                                jogador_atual.valor_aposta=valor_raise
-                                #run=False
-                redrawGameWindow(texto_nome,texto_fichas,cartas_visiveis,jogador_atual)
+            if jogador_atual.desistiu==0:
+                texto_nome = fonte_pequena.render(jogador_atual.nome, 1, (4, 15, 1))
+                texto_fichas = fonte_muito_pequena.render(str(jogador_atual.qtdMoedas), 0, (4, 15, 133))
+                run = True
+                while(run):
+                    clock.tick(60)
+                    for event in pygame.event.get():
+                        if event.type==pygame.QUIT:
+                            pygame.quit()
+                            sys.exit()
+                        if event.type == pygame.MOUSEBUTTONDOWN:
+                            posicao = pygame.mouse.get_pos()
+                            if check.clicar(posicao):
+                                run=False
+                            elif raise_botao.clicar(posicao):
+                                valor_raise=menu(1)
+                                if valor_raise.isnumeric():
+                                    jogador_atual.alterar_aposta(int(valor_raise),mesa)
+                                    mesa.maior_aposta=int(valor_raise)
+                                    run=False
+                                else:
+                                    pass
+                            elif call.clicar(posicao):
+                                if jogador_atual.valor_aposta<mesa.maior_aposta:
+                                    jogador_atual.alterar_aposta(mesa.maior_aposta,mesa)
+                                if jogador_atual.valor_aposta==mesa.maior_aposta:
+                                    valor_raise = menu(1)
+                                    print(int(valor_raise))
+                                    if valor_raise.isnumeric():
+                                        jogador_atual.alterar_aposta(int(valor_raise), mesa)
+                                        mesa.maior_aposta = int(valor_raise)
+                                        run=False
+                                    else:
+                                        pass
+                            elif fold.clicar(posicao):
+                                jogador_atual.desistiu=True
+                                mesa.jogadores_validos.remove(jogador_atual)
+                                run=False
+                    redesenhar_tela(texto_nome,texto_fichas,cartas_visiveis,jogador_atual,mesa)
             p+=1
             if p==njogadores:
-                p=0
-                fase+=1
-                if fase!=3:
-                    cartas_visiveis.append(mesa.cartas_mesa_objeto[fase+2])
+                p = 0
+                if len(mesa.jogadores_validos)==1:
+                    break
+                elif all(p.pronto_para_continuar(mesa.maior_aposta) for p in mesa.jogadores):
+                    fase+=1
+                    if fase==1:
+                        cartas_visiveis = [mesa.cartas_mesa_objeto[0], mesa.cartas_mesa_objeto[1],mesa.cartas_mesa_objeto[2]]
+                    elif fase!=4:
+                        cartas_visiveis.append(mesa.cartas_mesa_objeto[fase+1])
+                    for jogador in mesa.jogadores:
+                        mesa.pot+=jogador.valor_aposta
+                        mesa.maior_aposta=0
+                        jogador.valor_aposta=0
         resultado(mesa.checa_vencedor(),clock)
         for jogador in mesa.jogadores:
             jogador.devolver_cartas()
             mesa.nova_rodada()
+    resultado_final(mesa.jogadores[0],clock)
+
 #tipo = 0 para menu inicial, tipo = 1 para raise e tipo=2 para menu_numero_jogadores
 def menu(tipo,njogadores=0):
     p=0
@@ -163,9 +226,9 @@ def menu(tipo,njogadores=0):
                 if tipo != 0:
                     if prosseguir.clicar(posicao):
                         run=False
-                    if tipo==1:
-                        if voltar.clicar(posicao):
-                            return 0
+                    if voltar.clicar(posicao):
+                        if tipo == 1:
+                            return 'voltou'
                 if tipo==0:
                     if prosseguir.clicar(posicao):
                         p+=1
@@ -218,10 +281,9 @@ def menu(tipo,njogadores=0):
         print(nomes)
         main(nomes,clock)
     if tipo==1:
-        try:
-            valor = int(texto_usuario)
-            return valor
-        except:
+        if texto_usuario.isnumeric():
+            return texto_usuario
+        else:
             pygame.time.delay(2000)
             menu(1)
     if tipo==2:

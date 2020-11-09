@@ -5,9 +5,11 @@ class Jogador:
         self.nome=nome
         self.mao=[]
         self.mao_objetos=[]
-        self.qtdFichas=500
+        self.qtdMoedas=500
         self.valor_mao=-1
         self.valor_aposta=0
+        self.allin=False
+        self.desistiu=False
 
     def __repr__(self):
         return "("+ str(self.mao)+","+str(self.valor_mao)+")"
@@ -26,19 +28,19 @@ class Jogador:
         self.mao_objetos=[]
         self.valor_mao=-1
         self.valor_aposta=0
+        self.desistiu=False
+        self.allin=False
 
     #Vamos implementar depois
-    def check(self):
-        pass
+    def alterar_aposta(self,valor,mesa):
+        if valor>=self.qtdMoedas:
+            self.allin=True
+            self.qtdMoedas=0
+        else:
+            self.qtdMoedas-=valor
+        self.valor_aposta+=valor
 
-    def call(self):
-        pass
-
-    def aumentar(self):
-        pass
-
-    def allin(self):
-        pass
-
+    def pronto_para_continuar(self,maior_aposta_mesa):
+        return self.valor_aposta==maior_aposta_mesa or self.allin or self.desistiu
 
 

@@ -12,19 +12,30 @@ pygame.display.set_caption("IME PokerStars")
 fonte = pygame.font.SysFont("comicsans", 60)
 fonte_grande = pygame.font.SysFont("comicsans", 80)
 fonte_pequena = pygame.font.SysFont("comicsans", 40)
-fonte_muito_pequena = pygame.font.SysFont("comicsans", 20)
+fonte_muito_pequena = pygame.font.SysFont("comicsans", 30)
 pos=[[50,-100],[150,-100],[250,-100],[350,-100],[450,-100]]
-check=Botao("check",600,300,(119, 107, 181),40,100,50)
-prosseguir=Botao("Entrar na partida",220,250,(119,107,181),20,110,20)
+check=Botao("check",420,350,(119, 107, 181),30,80,40)
+fold=Botao("fold",420,295,(119, 107, 181),30,80,40)
+call=Botao("call",520,295,(119, 107, 181),30,80,40)
+raise_botao=Botao("raise",520,350,(119, 107, 181),30,80,40)
+prosseguir=Botao("Prosseguir",220,250,(119,107,181),20,110,20)
+voltar=Botao("Voltar",220,280,(119,107,181),20,110,20)
+moeda_objeto=(pygame.image.load(f"./PokerStarsIME_imgs/Coin.png"))
+moeda_objeto=(pygame.transform.scale(moeda_objeto,(51,75)))
 cartas_mao = []
 cartas_mesa = []
 resultados=['Carta alta','Par','Dois pares','Trinca','Sequencia','Flush','Full House','Quadra','Straight Flush','Royal Flush']
 p=0
 
-def redrawGameWindow(texto_nome):
+def redrawGameWindow(texto_nome,texto_fichas):
     tela.fill((35,125,90))
     check.desenhar(tela)
-    tela.blit(texto_nome,(20,350))
+    fold.desenhar(tela)
+    call.desenhar(tela)
+    raise_botao.desenhar(tela)
+    tela.blit(texto_nome,(20,280))
+    tela.blit(texto_fichas, (80, 375))
+    tela.blit(moeda_objeto,(20,315))
     a=200
     b=300
     for carta in cartas_mao:
@@ -68,17 +79,17 @@ def resultado(resultado_jogo):
 
         pygame.display.update()
 
-def main(nome):
+def main(nome,clock):
     mesa = Mesa(1)
-    mesa.adicionar_jogador(Jogador(nome, 500))
-    texto_nome=fonte_pequena.render(nome,1,(4, 15, 133))
+    player1=Jogador(nome)
+    mesa.adicionar_jogador(player1)
+    texto_nome=fonte_pequena.render(nome,1,(4, 15, 1))
+    texto_fichas=fonte_muito_pequena.render(str(player1.qtdFichas),0,(4, 15, 133))
     mesa.distribuir_cartas()
     mesa.colocar_cartas_mesa()
-    clock = pygame.time.Clock()
     run = True
     k = 0
     ncartas = 3
-    clique=0
     for i in range(0, 2):
         for jogador in mesa.jogadores:
             cartas_mao.append(pygame.image.load(f"./PokerStarsIME_imgs/{str(jogador.mao[i])}.png"))
@@ -100,15 +111,20 @@ def main(nome):
                         ncartas+=1
                     if ncartas==6:
                         run=False
+                elif raise_botao.clicar(posicao):
+                    valor_raise=menu(1)
+                    if valor_raise!=0:
+                        jogador.valor_aposta=valor_raise
+                        #run=False
         if ncartas<6:
             if k<ncartas:
                 pos[k][1]+=10
                 if pos[k][1]==150:
                     k+=1
-        redrawGameWindow(texto_nome)
+        redrawGameWindow(texto_nome,texto_fichas)
     resultado(mesa.checa_vencedor())
-
-def menu():
+#tipo = 0 para menu inicial e tipo = 1 para raise
+def menu(tipo):
     run=True
     clock = pygame.time.Clock()
     texto_usuario = ''
@@ -124,19 +140,37 @@ def menu():
                 posicao = pygame.mouse.get_pos()
                 if prosseguir.clicar(posicao):
                     run=False
+                if voltar.clicar(posicao):
+                    return 0
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_BACKSPACE:
+                if event.key == pygame.K_RETURN:
+                    run = False
+                elif event.key == pygame.K_BACKSPACE:
                     texto_usuario=texto_usuario[0:-1]
                 else:
-                    if len(texto_usuario)<=10:
+                    if len(texto_usuario)<=10 and event.key != pygame.K_RETURN:
                         texto_usuario += event.unicode
         tela.fill((35,125,90))
         pygame.draw.rect(tela,cor_retangulo,retangulo)
-        texto_titulo = fonte_grande.render("Digite o seu nome:", 1, (4, 15, 133))
-        tela.blit(texto_titulo,(125,50))
+        if tipo==0:
+            texto_titulo = fonte_grande.render("Digite o seu nome:", 1, (4, 15, 133))
+            tela.blit(texto_titulo, (125, 50))
+        if tipo==1:
+            texto_titulo = fonte.render("Digite o valor que deseja apostar:", 1, (4, 15, 133))
+            tela.blit(texto_titulo, (80, 80))
+            voltar.desenhar(tela)
         texto=fonte_pequena.render(texto_usuario,1,(4, 15, 133))
         tela.blit(texto,(retangulo.x+5,retangulo.y+5))
         prosseguir.desenhar(tela)
         pygame.display.update()
-    main(texto_usuario)
-menu()
+    if tipo==0:
+        main(texto_usuario,clock)
+    if tipo==1:
+        try:
+            valor = int(texto_usuario)
+            return valor
+        except:
+            pygame.time.delay(2000)
+            menu(1)
+
+menu(0)

@@ -1,11 +1,12 @@
 #vai ser o cliente do socket
 from Regras_Poker import *
 class Jogador:
-    def __init__(self,nome,qtdFichas):
+    def __init__(self,nome):
         self.nome=nome
         self.mao=[]
-        self.qtdFichas=qtdFichas
+        self.qtdFichas=500
         self.valor_mao=-1
+        self.valor_aposta=0
 
     def __repr__(self):
         return "("+ str(self.mao)+","+str(self.valor_mao)+")"

@@ -32,13 +32,14 @@ class Jogador:
         self.allin=False
 
     #Vamos implementar depois
-    def alterar_aposta(self,valor,mesa):
+    def alterar_aposta(self,valor):
         if valor>=self.qtdMoedas:
             self.allin=True
-            self.qtdMoedas=0
+            self.valor_aposta = self.qtdMoedas
+            self.qtdMoedas = 0
         else:
             self.qtdMoedas-=valor
-        self.valor_aposta+=valor
+            self.valor_aposta+=valor
 
     def pronto_para_continuar(self,maior_aposta_mesa):
         return self.valor_aposta==maior_aposta_mesa or self.allin or self.desistiu

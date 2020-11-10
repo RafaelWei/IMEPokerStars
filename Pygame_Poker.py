@@ -17,7 +17,6 @@ pos=[[50,-100],[150,-100],[250,-100],[350,-100],[450,-100]]
 check=Botao("check",420,350,(119, 107, 181),30,80,40)
 fold=Botao("fold",420,295,(119, 107, 181),30,80,40)
 call=Botao("call",520,295,(119, 107, 181),30,80,40)
-raise_botao=Botao("raise",520,350,(119, 107, 181),30,80,40)
 prosseguir=Botao("Prosseguir",220,250,(119,107,181),20,110,20)
 prox_rodada=Botao("Proxima rodada",650,350,(119,107,181),20,110,20)
 voltar=Botao("Voltar",220,280,(119,107,181),20,110,20)
@@ -49,8 +48,6 @@ def redesenhar_tela(texto_nome,texto_fichas,cartas_visiveis,jogador,mesa):
         check.desenhar(tela)
     fold.desenhar(tela)
     call.desenhar(tela)
-    if mesa.maior_aposta>jogador.valor_aposta:
-        raise_botao.desenhar(tela)
     tela.blit(texto_nome,(20,280))
     tela.blit(texto_fichas, (80, 375))
     tela.blit(moeda_objeto,(20,315))
@@ -77,7 +74,7 @@ def redesenhar_tela(texto_nome,texto_fichas,cartas_visiveis,jogador,mesa):
         a+=100
     pygame.display.update()
 
-def resultado(resultado_jogo,clock):
+def resultado(resultado_jogo,clock,fase):
     run=True
     cartas_resultado=[]
 
@@ -119,10 +116,11 @@ def resultado(resultado_jogo,clock):
             for jogador in vencedores:
                 tela.blit(jogador,(150,b))
                 b+=60
-        for carta in cartas_resultado:
-            tela.blit(carta, (d,15))
-            d += 100
-        tela.blit(resultado_mao,(150,120))
+        if fase==4:
+            for carta in cartas_resultado:
+                tela.blit(carta, (d,15))
+                d += 100
+            tela.blit(resultado_mao,(150,120))
         prox_rodada.desenhar(tela)
         pygame.display.update()
 
@@ -133,9 +131,8 @@ def main(nomes,clock):
         player = Jogador(nome)
         mesa.adicionar_jogador(player)
     while len(mesa.jogadores)>1:
-        acabou=False
-        fase=0
         p=0
+        fase=0
         mesa.distribuir_cartas()
         mesa.colocar_cartas_mesa()
         for i in range(0, 2):
@@ -146,6 +143,8 @@ def main(nomes,clock):
         cartas_visiveis=[]
         while fase!=4:
             jogador_atual=mesa.jogadores[p]
+            if len(mesa.jogadores_validos)==1:
+                break
             if jogador_atual.desistiu==0:
                 texto_nome = fonte_pequena.render(jogador_atual.nome, 1, (4, 15, 1))
                 texto_fichas = fonte_muito_pequena.render(str(jogador_atual.qtdMoedas), 0, (4, 15, 133))
@@ -160,26 +159,13 @@ def main(nomes,clock):
                             posicao = pygame.mouse.get_pos()
                             if check.clicar(posicao):
                                 run=False
-                            elif raise_botao.clicar(posicao):
-                                valor_raise=menu(1)
-                                if valor_raise.isnumeric():
-                                    jogador_atual.alterar_aposta(int(valor_raise),mesa)
-                                    mesa.maior_aposta=int(valor_raise)
-                                    run=False
-                                else:
-                                    pass
                             elif call.clicar(posicao):
-                                if jogador_atual.valor_aposta<mesa.maior_aposta:
-                                    jogador_atual.alterar_aposta(mesa.maior_aposta,mesa)
-                                if jogador_atual.valor_aposta==mesa.maior_aposta:
-                                    valor_raise = menu(1)
-                                    print(int(valor_raise))
-                                    if valor_raise.isnumeric():
-                                        jogador_atual.alterar_aposta(int(valor_raise), mesa)
-                                        mesa.maior_aposta = int(valor_raise)
+                                valor_raise = menu(1)
+                                if valor_raise.isnumeric():
+                                    if jogador_atual.valor_aposta+int(valor_raise)>=mesa.maior_aposta:
+                                        jogador_atual.alterar_aposta(int(valor_raise))
+                                        mesa.maior_aposta = jogador_atual.valor_aposta
                                         run=False
-                                    else:
-                                        pass
                             elif fold.clicar(posicao):
                                 jogador_atual.desistiu=True
                                 mesa.jogadores_validos.remove(jogador_atual)
@@ -188,9 +174,11 @@ def main(nomes,clock):
             p+=1
             if p==njogadores:
                 p = 0
+                for jogador in mesa.jogadores:
+                    print(jogador.pronto_para_continuar(mesa.maior_aposta))
                 if len(mesa.jogadores_validos)==1:
                     break
-                elif all(p.pronto_para_continuar(mesa.maior_aposta) for p in mesa.jogadores):
+                elif all(pl.pronto_para_continuar(mesa.maior_aposta) for pl in mesa.jogadores_validos):
                     fase+=1
                     if fase==1:
                         cartas_visiveis = [mesa.cartas_mesa_objeto[0], mesa.cartas_mesa_objeto[1],mesa.cartas_mesa_objeto[2]]
@@ -200,8 +188,17 @@ def main(nomes,clock):
                         mesa.pot+=jogador.valor_aposta
                         mesa.maior_aposta=0
                         jogador.valor_aposta=0
-        resultado(mesa.checa_vencedor(),clock)
+        vencedor=mesa.checa_vencedor()
+        resultado(vencedor,clock,fase)
         for jogador in mesa.jogadores:
+            p=0
+            if isinstance(vencedor, Jogador):
+                vencedor.qtdMoedas+=mesa.pot
+            else:
+                if jogador in vencedor:
+                    jogador.qtdMoedas+=mesa.pot//len(vencedor)
+            if jogador.qtdMoedas == 0:
+                mesa.jogadores.remove(jogador)
             jogador.devolver_cartas()
             mesa.nova_rodada()
     resultado_final(mesa.jogadores[0],clock)
@@ -287,9 +284,11 @@ def menu(tipo,njogadores=0):
             pygame.time.delay(2000)
             menu(1)
     if tipo==2:
-        try:
-            numero_players = int(texto_usuario)
-        except:
+        numero_players =texto_usuario
+        if numero_players.isnumeric():
+            if int(numero_players)>8:
+                sys.exit('O numero de jogadores deve ser menor ou igual a 8')
+        else:
             sys.exit('O numero deve ser inteiro')
-        menu(0, numero_players)
+        menu(0,int(numero_players))
 menu(2)

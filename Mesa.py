@@ -28,12 +28,12 @@ class Mesa:
             self.cartas_mesa.append(carta_da_vez)
 
     def checa_vencedor(self):
-        for jogador in self.jogadores:
+        for jogador in self.jogadores_validos:
             jogador.checar_melhor_mao()
-        self.jogadores.sort(key=ordenar_jogadores, reverse=True)
-        resultado=(self.jogadores[0]).valor_mao
+        self.jogadores_validos.sort(key=ordenar_jogadores, reverse=True)
+        resultado=(self.jogadores_validos[0]).valor_mao
         empatados=[]
-        for jogador in self.jogadores:
+        for jogador in self.jogadores_validos:
             if jogador.valor_mao==resultado:
                 empatados.append(jogador)
             else:
@@ -42,7 +42,7 @@ class Mesa:
             vencedor=self.desempatar(empatados)
         else:
             vencedor=empatados[0]
-        print(self.jogadores)
+        print(self.jogadores_validos)
         return vencedor
 
     def adicionar_jogador(self,jogador):

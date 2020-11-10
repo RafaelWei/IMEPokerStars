@@ -14,14 +14,18 @@ fonte_grande = pygame.font.SysFont("comicsans", 80)
 fonte_pequena = pygame.font.SysFont("comicsans", 40)
 fonte_muito_pequena = pygame.font.SysFont("comicsans", 30)
 pos=[[50,-100],[150,-100],[250,-100],[350,-100],[450,-100]]
-check=Botao("check",420,350,(119, 107, 181),30,80,40)
-fold=Botao("fold",420,295,(119, 107, 181),30,80,40)
-call=Botao("call",520,295,(119, 107, 181),30,80,40)
+check=Botao("check",400,350,(119, 107, 181),30,80,40)
+fold=Botao("fold",400,295,(119, 107, 181),30,80,40)
+call=Botao("call",500,350,(119, 107, 181),30,80,40)
+bet=Botao("bet",500,295,(119, 107, 181),30,80,40)
+raise_botao=Botao("raise",500,295,(119, 107, 181),30,80,40)
 prosseguir=Botao("Prosseguir",220,250,(119,107,181),20,110,20)
 prox_rodada=Botao("Proxima rodada",650,350,(119,107,181),20,110,20)
 voltar=Botao("Voltar",220,280,(119,107,181),20,110,20)
 moeda_objeto=(pygame.image.load(f"./PokerStarsIME_imgs/Coin.png"))
 moeda_objeto=(pygame.transform.scale(moeda_objeto,(51,75)))
+dealer_objeto=(pygame.image.load(f'./PokerStarsIME_imgs/dealer.png'))
+dealer_objeto=(pygame.transform.scale(dealer_objeto,(36,30)))
 resultados=['Carta alta','Par','Dois pares','Trinca','Sequencia','Flush','Full House','Quadra','Straight Flush','Royal Flush']
 p=0
 
@@ -46,8 +50,11 @@ def redesenhar_tela(texto_nome,texto_fichas,cartas_visiveis,jogador,mesa):
     tela.fill((35,125,90))
     if jogador.valor_aposta==mesa.maior_aposta:
         check.desenhar(tela)
+        bet.desenhar(tela)
     fold.desenhar(tela)
-    call.desenhar(tela)
+    if mesa.maior_aposta > jogador.valor_aposta:
+        raise_botao.desenhar(tela)
+        call.desenhar(tela)
     tela.blit(texto_nome,(20,280))
     tela.blit(texto_fichas, (80, 375))
     tela.blit(moeda_objeto,(20,315))
@@ -56,12 +63,13 @@ def redesenhar_tela(texto_nome,texto_fichas,cartas_visiveis,jogador,mesa):
     pote=fonte.render(str(mesa.pot), 1, (4, 15, 133))
     tela.blit(pote,(135,8))
     c=5
-    delta=64
+    delta=50
+    tela.blit(dealer_objeto, (590, (c+delta*(mesa.dealer))))
     for player in mesa.jogadores:
         nome_aposta=fonte_muito_pequena.render(player.nome,1,(0,0,0))
         tela.blit(nome_aposta,(620,c))
         aposta=fonte_muito_pequena.render(str(player.valor_aposta),1,(0,0,0))
-        tela.blit(aposta,(620,c+3*delta//8))
+        tela.blit(aposta,(620,c+5*delta//12))
         c+=delta
     a=200
     b=300
@@ -74,10 +82,9 @@ def redesenhar_tela(texto_nome,texto_fichas,cartas_visiveis,jogador,mesa):
         a+=100
     pygame.display.update()
 
-def resultado(resultado_jogo,clock,fase):
+def resultado(resultado_jogo,clock,mesa):
     run=True
     cartas_resultado=[]
-
     if isinstance(resultado_jogo,Jogador):
         cartas=resultado_jogo.mao
         mao=resultado_jogo.valor_mao
@@ -116,7 +123,7 @@ def resultado(resultado_jogo,clock,fase):
             for jogador in vencedores:
                 tela.blit(jogador,(150,b))
                 b+=60
-        if fase==4:
+        if len(mesa.jogadores_validos)!=1:
             for carta in cartas_resultado:
                 tela.blit(carta, (d,15))
                 d += 100
@@ -125,7 +132,6 @@ def resultado(resultado_jogo,clock,fase):
         pygame.display.update()
 
 def main(nomes,clock):
-    njogadores = len(nomes)
     mesa = Mesa()
     for nome in nomes:
         player = Jogador(nome)
@@ -135,6 +141,7 @@ def main(nomes,clock):
         fase=0
         mesa.distribuir_cartas()
         mesa.colocar_cartas_mesa()
+        mesa.definir_blinds()
         for i in range(0, 2):
             for jogador in mesa.jogadores:
                 jogador.mao_objetos.append(pygame.image.load(f"./PokerStarsIME_imgs/{str(jogador.mao[i])}.png"))
@@ -142,10 +149,13 @@ def main(nomes,clock):
             mesa.cartas_mesa_objeto.append(pygame.image.load(f"./PokerStarsIME_imgs/{str(mesa.jogadores[0].mao[j + 2])}.png"))
         cartas_visiveis=[]
         while fase!=4:
-            jogador_atual=mesa.jogadores[p]
+            if fase==0:
+                jogador_atual=mesa.jogadores[(p+mesa.dealer+3)%len(mesa.jogadores)]
+            else:
+                jogador_atual = mesa.jogadores[(p + mesa.dealer + 1) % len(mesa.jogadores)]
             if len(mesa.jogadores_validos)==1:
                 break
-            if jogador_atual.desistiu==0:
+            if jogador_atual.desistiu==False and jogador_atual.allin==False:
                 texto_nome = fonte_pequena.render(jogador_atual.nome, 1, (4, 15, 1))
                 texto_fichas = fonte_muito_pequena.render(str(jogador_atual.qtdMoedas), 0, (4, 15, 133))
                 run = True
@@ -159,48 +169,50 @@ def main(nomes,clock):
                             posicao = pygame.mouse.get_pos()
                             if check.clicar(posicao):
                                 run=False
-                            elif call.clicar(posicao):
+                            elif raise_botao.clicar(posicao):
                                 valor_raise = menu(1)
                                 if valor_raise.isnumeric():
                                     if jogador_atual.valor_aposta+int(valor_raise)>=mesa.maior_aposta:
-                                        jogador_atual.alterar_aposta(int(valor_raise))
-                                        mesa.maior_aposta = jogador_atual.valor_aposta
+                                        jogador_atual.alterar_aposta(int(valor_raise),mesa)
                                         run=False
+                            elif call.clicar(posicao):
+                                jogador_atual.alterar_aposta((mesa.maior_aposta-jogador_atual.valor_aposta), mesa)
+                                run=False
                             elif fold.clicar(posicao):
                                 jogador_atual.desistiu=True
                                 mesa.jogadores_validos.remove(jogador_atual)
                                 run=False
                     redesenhar_tela(texto_nome,texto_fichas,cartas_visiveis,jogador_atual,mesa)
             p+=1
-            if p==njogadores:
+            if all((pla.valor_aposta==mesa.maior_aposta or pla.allin) for pla in mesa.jogadores_validos) and p>=len(mesa.jogadores):
                 p = 0
+                num_allin=0
                 for jogador in mesa.jogadores:
-                    print(jogador.pronto_para_continuar(mesa.maior_aposta))
+                    if jogador.allin:
+                        num_allin+=1
+                    mesa.pot+=jogador.valor_aposta
+                    mesa.maior_aposta=0
+                    jogador.valor_aposta=0
                 if len(mesa.jogadores_validos)==1:
                     break
-                elif all(pl.pronto_para_continuar(mesa.maior_aposta) for pl in mesa.jogadores_validos):
-                    fase+=1
-                    if fase==1:
-                        cartas_visiveis = [mesa.cartas_mesa_objeto[0], mesa.cartas_mesa_objeto[1],mesa.cartas_mesa_objeto[2]]
-                    elif fase!=4:
-                        cartas_visiveis.append(mesa.cartas_mesa_objeto[fase+1])
-                    for jogador in mesa.jogadores:
-                        mesa.pot+=jogador.valor_aposta
-                        mesa.maior_aposta=0
-                        jogador.valor_aposta=0
+                elif num_allin>=len(mesa.jogadores_validos)-1:
+                    break
+                fase+=1
+                if fase==1:
+                    cartas_visiveis = [mesa.cartas_mesa_objeto[0], mesa.cartas_mesa_objeto[1],mesa.cartas_mesa_objeto[2]]
+                elif fase!=4:
+                    cartas_visiveis.append(mesa.cartas_mesa_objeto[fase+1])
         vencedor=mesa.checa_vencedor()
-        resultado(vencedor,clock,fase)
+        resultado(vencedor,clock,mesa)
+        if isinstance(vencedor, Jogador):
+            vencedor.qtdMoedas+=mesa.pot
+        else:
+            for jogador in vencedor:
+                jogador.qtdMoedas += mesa.pot // len(vencedor)
+        mesa.jogadores=[x for x in mesa.jogadores if x.qtdMoedas>0]
         for jogador in mesa.jogadores:
-            p=0
-            if isinstance(vencedor, Jogador):
-                vencedor.qtdMoedas+=mesa.pot
-            else:
-                if jogador in vencedor:
-                    jogador.qtdMoedas+=mesa.pot//len(vencedor)
-            if jogador.qtdMoedas == 0:
-                mesa.jogadores.remove(jogador)
             jogador.devolver_cartas()
-            mesa.nova_rodada()
+        mesa.nova_rodada()
     resultado_final(mesa.jogadores[0],clock)
 
 #tipo = 0 para menu inicial, tipo = 1 para raise e tipo=2 para menu_numero_jogadores
@@ -275,7 +287,6 @@ def menu(tipo,njogadores=0):
             prosseguir.desenhar(tela)
             pygame.display.update()
     if tipo==0 and p==njogadores:
-        print(nomes)
         main(nomes,clock)
     if tipo==1:
         if texto_usuario.isnumeric():

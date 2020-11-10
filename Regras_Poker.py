@@ -1,6 +1,6 @@
 from Carta import Carta
 valores=['2','3','4','5','6','7','8','9','10','J','Q','K','A']
-naipes=["♥","♦","♠","♣"]
+naipes=["C","O","E","P"]
 resultados=['Carta alta','Par','Dois pares','Trinca','Sequencia','Flush','Full House','Quadra','Straight Flush','Royal Flush']
 ####################################################
 #####FUNCOES USADAS PARA ENCONTRAR A MELHOR MAO#####
@@ -174,15 +174,15 @@ def jogar(cartas):
 
 #Funcao para testar todas as combinacoes possiveis:
 def testar():
-    print(jogar([Carta('5',"♥"),Carta('5',"♦"),Carta('5',"♣"),Carta('5',"♠"),Carta('6',"♥"),Carta('7',"♣"),Carta('2',"♥")])) #quadra
-    print(jogar([Carta('5', "♥"), Carta('5', "♦"), Carta('5', "♣"), Carta('6', "♠"), Carta('6', "♥"), Carta('2', "♣"),Carta('2', "♥")]))  #Full House
-    print(jogar([Carta('5', "♥"), Carta('5', "♦"), Carta('5', "♣"), Carta('6', "♠"), Carta('6', "♥"), Carta('7', "♣"),Carta('6', "♥")]))  #Full House
-    print(jogar([Carta('K', "♥"), Carta('J', "♦"), Carta('2', "♣"), Carta('6', "♠"), Carta('6', "♥"), Carta('7', "♣"),Carta('6', "♥")]))  #Trinca
-    print(jogar([Carta('5', "♥"), Carta('5', "♦"), Carta('2', "♣"), Carta('2', "♠"), Carta('6', "♥"), Carta('7', "♣"),Carta('6', "♥")]))  #Tres Pares
-    print(jogar([Carta('5', "♥"), Carta('5', "♦"), Carta('J', "♣"), Carta('3', "♠"), Carta('6', "♥"), Carta('7', "♣"),Carta('6', "♥")]))  #Dois Pares
-    print(jogar([Carta('3', "♥"), Carta('5', "♦"), Carta('2', "♣"), Carta('Q', "♠"), Carta('6', "♥"), Carta('7', "♣"),Carta('6', "♥")]))  #Um Par
-    print(jogar([Carta('10', "♥"), Carta('J', "♥"), Carta('K', "♥"), Carta('Q', "♠"), Carta('Q', "♥"), Carta('A', "♥"),Carta('6', "♥")])) #Royal Flush
-    print(jogar([Carta('5', "♥"), Carta('7', "♥"), Carta('8', "♥"), Carta('2', "♠"), Carta('6', "♥"), Carta('7', "♥"),Carta('9', "♥")]))  #Straight Flush
-    print(jogar([Carta('A', "♥"), Carta('7', "♥"), Carta('2', "♥"), Carta('2', "♠"), Carta('4', "♥"), Carta('9', "♥"),Carta('Q', "♥")]))  #Flush
-    print(jogar([Carta('5', "♠"), Carta('8', "♦"), Carta('9', "♣"), Carta('5', "♠"), Carta('6', "♥"), Carta('7', "♣"),Carta('2', "♥")]))  #Sequencia
-    print(jogar([Carta('A', "♠"), Carta('2', "♦"), Carta('4', "♣"), Carta('6', "♠"), Carta('7', "♥"), Carta('9', "♣"),Carta('Q', "♥")]))  #Carta Alta
+    print(jogar([Carta('5',"C"),Carta('5',"O"),Carta('5',"P"),Carta('5',"E"),Carta('6',"C"),Carta('7',"P"),Carta('2',"C")])) #quadra
+    print(jogar([Carta('5', "C"), Carta('5', "O"), Carta('5', "P"), Carta('6', "E"), Carta('6', "C"), Carta('2', "P"),Carta('2', "C")]))  #Full House
+    print(jogar([Carta('5', "C"), Carta('5', "O"), Carta('5', "P"), Carta('6', "E"), Carta('6', "C"), Carta('7', "P"),Carta('6', "C")]))  #Full House
+    print(jogar([Carta('K', "C"), Carta('J', "O"), Carta('2', "P"), Carta('6', "E"), Carta('6', "C"), Carta('7', "P"),Carta('6', "C")]))  #Trinca
+    print(jogar([Carta('5', "C"), Carta('5', "O"), Carta('2', "P"), Carta('2', "E"), Carta('6', "C"), Carta('7', "P"),Carta('6', "C")]))  #Tres Pares
+    print(jogar([Carta('5', "C"), Carta('5', "O"), Carta('J', "P"), Carta('3', "E"), Carta('6', "C"), Carta('7', "P"),Carta('6', "C")]))  #Dois Pares
+    print(jogar([Carta('3', "C"), Carta('5', "O"), Carta('2', "P"), Carta('Q', "E"), Carta('6', "C"), Carta('7', "P"),Carta('6', "C")]))  #Um Par
+    print(jogar([Carta('10', "C"), Carta('J', "C"), Carta('K', "C"), Carta('Q', "E"), Carta('Q', "C"), Carta('A', "C"),Carta('6', "C")])) #Royal Flush
+    print(jogar([Carta('5', "C"), Carta('7', "C"), Carta('8', "C"), Carta('2', "E"), Carta('6', "C"), Carta('7', "C"),Carta('9', "C")]))  #Straight Flush
+    print(jogar([Carta('A', "C"), Carta('7', "C"), Carta('2', "C"), Carta('2', "E"), Carta('4', "C"), Carta('9', "C"),Carta('Q', "C")]))  #Flush
+    print(jogar([Carta('5', "E"), Carta('8', "O"), Carta('9', "P"), Carta('5', "E"), Carta('6', "C"), Carta('7', "P"),Carta('2', "C")]))  #Sequencia
+    print(jogar([Carta('A', "E"), Carta('2', "O"), Carta('4', "P"), Carta('6', "E"), Carta('7', "C"), Carta('9', "P"),Carta('Q', "C")]))  #Carta Alta

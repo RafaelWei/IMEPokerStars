@@ -1,6 +1,6 @@
 from Baralho import Baralho
 valores=['2','3','4','5','6','7','8','9','10','J','Q','K','A']
-naipes=["♥","♦","♠","♣"]
+naipes=["C","O","E","P"]
 def ordenar_jogadores(jogador):
     return jogador.valor_mao
 
@@ -13,6 +13,8 @@ class Mesa:
         self.cartas_mesa=[]
         self.cartas_mesa_objeto=[]
         self.maior_aposta=0
+        self.dealer=0
+        self.aposta_big=40
 
     def distribuir_cartas(self):
         for i in range(0,2):
@@ -26,6 +28,17 @@ class Mesa:
             for jogador in self.jogadores:
                 jogador.adicionar_carta(carta_da_vez)
             self.cartas_mesa.append(carta_da_vez)
+
+    def definir_blinds(self):
+        if len(self.jogadores)==2:
+            self.small_blind=self.dealer
+            self.big_blind=(self.dealer+1)%2
+        else:
+            self.small_blind=(self.dealer+1)%len(self.jogadores)
+            self.big_blind=(self.dealer+2)%len(self.jogadores)
+        self.jogadores[self.small_blind].alterar_aposta(self.aposta_big // 2, self)
+        self.jogadores[self.big_blind].alterar_aposta(self.aposta_big,self)
+
 
     def checa_vencedor(self):
         for jogador in self.jogadores_validos:
@@ -42,7 +55,6 @@ class Mesa:
             vencedor=self.desempatar(empatados)
         else:
             vencedor=empatados[0]
-        print(self.jogadores_validos)
         return vencedor
 
     def adicionar_jogador(self,jogador):
@@ -69,4 +81,7 @@ class Mesa:
         self.cartas_mesa_objeto = []
         self.maior_aposta=0
         self.jogadores_validos=self.jogadores.copy()
+        self.dealer+=1
+        if self.dealer==len(self.jogadores):
+            self.dealer=0
 

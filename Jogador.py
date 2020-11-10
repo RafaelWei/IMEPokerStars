@@ -14,6 +14,9 @@ class Jogador:
     def __repr__(self):
         return "("+ str(self.mao)+","+str(self.valor_mao)+")"
 
+    def __eq__(self,other):
+        return self.nome==other.nome and self.mao==other.mao and self.qtdMoedas==other.qtdMoedas and self.valor_aposta==other.valor_aposta
+
     def adicionar_carta(self,carta):
         self.mao.append(carta)
 
@@ -32,7 +35,7 @@ class Jogador:
         self.allin=False
 
     #Vamos implementar depois
-    def alterar_aposta(self,valor):
+    def alterar_aposta(self,valor,mesa):
         if valor>=self.qtdMoedas:
             self.allin=True
             self.valor_aposta = self.qtdMoedas
@@ -40,6 +43,8 @@ class Jogador:
         else:
             self.qtdMoedas-=valor
             self.valor_aposta+=valor
+        if self.valor_aposta>mesa.maior_aposta:
+            mesa.maior_aposta = self.valor_aposta
 
     def pronto_para_continuar(self,maior_aposta_mesa):
         return self.valor_aposta==maior_aposta_mesa or self.allin or self.desistiu

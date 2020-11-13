@@ -66,9 +66,13 @@ def redesenhar_tela(texto_nome,texto_fichas,cartas_visiveis,jogador,mesa):
     delta=50
     tela.blit(dealer_objeto, (590, (c+delta*(mesa.dealer))))
     for player in mesa.jogadores:
-        nome_aposta=fonte_muito_pequena.render(player.nome,1,(0,0,0))
+        if player.desistiu==False:
+            nome_aposta=fonte_muito_pequena.render(player.nome,1,(0,0,0))
+            aposta = fonte_muito_pequena.render(str(player.valor_aposta), 1, (0, 0, 0))
+        else:
+            nome_aposta = fonte_muito_pequena.render(player.nome, 1, (192, 192, 204))
+            aposta = fonte_muito_pequena.render(str(player.valor_aposta), 1, (192, 192, 204))
         tela.blit(nome_aposta,(620,c))
-        aposta=fonte_muito_pequena.render(str(player.valor_aposta),1,(0,0,0))
         tela.blit(aposta,(620,c+5*delta//12))
         c+=delta
     a=200

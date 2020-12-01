@@ -166,29 +166,29 @@ def main(nomes,clock):
                 while(run):
                     clock.tick(60)
                     for event in pygame.event.get():
-                        if event.type==pygame.QUIT:
+                        if event.type==pygame.QUIT: #apertou o X da janela
                             pygame.quit()
                             sys.exit()
                         if event.type == pygame.MOUSEBUTTONDOWN:
                             posicao = pygame.mouse.get_pos()
-                            if check.clicar(posicao):
+                            if check.clicar(posicao): #apertou no check
                                 run=False
-                            elif raise_botao.clicar(posicao):
+                            elif raise_botao.clicar(posicao): #apertou no raise
                                 valor_raise = menu(1)
                                 if valor_raise.isnumeric():
                                     if jogador_atual.valor_aposta+int(valor_raise)>=mesa.maior_aposta:
-                                        jogador_atual.alterar_aposta(int(valor_raise),mesa)
+                                        jogador_atual.alterar_aposta(int(valor_raise),mesa) #aumento a aposta do jogador
                                         run=False
-                            elif call.clicar(posicao):
-                                jogador_atual.alterar_aposta((mesa.maior_aposta-jogador_atual.valor_aposta), mesa)
+                            elif call.clicar(posicao): #apertou call
+                                jogador_atual.alterar_aposta((mesa.maior_aposta-jogador_atual.valor_aposta), mesa) #iguala a maior aposta da mesa
                                 run=False
-                            elif fold.clicar(posicao):
+                            elif fold.clicar(posicao): #apertou o fold
                                 jogador_atual.desistiu=True
                                 mesa.jogadores_validos.remove(jogador_atual)
                                 run=False
                     redesenhar_tela(texto_nome,texto_fichas,cartas_visiveis,jogador_atual,mesa)
-            p+=1
-            if all((pla.valor_aposta==mesa.maior_aposta or pla.allin) for pla in mesa.jogadores_validos) and p>=len(mesa.jogadores):
+            p+=1 #jogador atual
+            if all((pla.valor_aposta==mesa.maior_aposta or pla.allin) for pla in mesa.jogadores_validos) and p>=len(mesa.jogadores): #manipulacao pra nova rodada
                 p = 0
                 num_allin=0
                 for jogador in mesa.jogadores:

@@ -33,13 +33,6 @@ print("Socket binded to ", port)
 s.listen(5)
 print("Socket listening")
 
-def acceptClients(s):
-    global clientes, qtd
-    while True:
-        conn, addr = s.accept()
-        clientes.append(conn)
-        qtd+=1
-        #conn.send(str.encode("Aguardando demais jogadores"))
 while qtd<3:
     conn, addr = s.accept()
     clientes.append(conn)
@@ -65,8 +58,6 @@ for i in range(0, 2*n_jogadores):
     conn.send(str.encode(str(carta) + "EOL"))
 
 time.sleep(1)
-
-print("Passou")
     
 """
     FLOP

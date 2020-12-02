@@ -56,5 +56,3 @@ class Mesa:
                 return empatados[0]
         return empatados
 
-
-

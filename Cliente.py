@@ -1,5 +1,6 @@
 import socket 
 import traceback
+import pyfiglet 
 from Carta import Carta
 
 mao = []
@@ -10,10 +11,13 @@ endFlag = "EOL"
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 port = 8080
 host = 'localhost'
+  
+result = pyfiglet.figlet_format("Fyre Poker Stars") 
+print(result) 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((host, port))
-print("Conectado. Aguardando os outros jogadores.")
+
 
 def receiveCard(s, buf, cardSet):
     if buf.find(endFlag) == -1:
@@ -194,7 +198,7 @@ try:
             1)Recebemos as cartas dos jogadores que ainda estao no jogo
             2)Recebemos as pontuações do servidor
             """
-
+            
 
     # if data=="Desconectando":
         # break

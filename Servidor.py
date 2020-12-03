@@ -216,31 +216,6 @@ for i in range(0, 2*n_jogadores):
     maos_clientes[i%n_jogadores].append(carta)
     conn.send(str.encode(str(carta) + "EOL"))
 
-time.sleep(1)
-
-print("Passou")
-    
-"""
-    FLOP
-    1)Viramos as 3 primeiras cartas na
-    2)Adicionamos as cartas nas maos dos clientes tambem(somente no servidor) para facilitar a verificacao das maos posteriormente
-    3)Enviamos as cartas para o cliente
-    4)Passamos a aposta da rodada como sendo -1 para saber que nao tem nenhuma aposta no inicio
-    5)O primeiro jogador agora eh o que fez o smallBlind no inicio
-    6)Zeramos o array de perdas da rodada 
-    7)Zeramos o array de apostas da rodada somente para os jogadores que nao deram fold em rodadas anteriores. Os que deram tem valor -1 no array
-    8)So podemos passar para a proxima fase quando todas as apostas forem iguais
-"""
-
-#3 primeiras cartas na mesa
-for j in range(0, 3):
-    carta = baralho.sacar_carta()
-    for i in range(0, n_jogadores):
-        conn = clientes[i]
-        maos_clientes[i].append(carta)
-        conn.send(str.encode(str(carta) + "EOL"))
-
-time.sleep(1)
 
 apostaDaRodada = bigBlind
 apostas_clientes[jogadorSmallBlind]=smallBlind
@@ -286,6 +261,89 @@ for i in range(0, 3):
     perda = str(perdas_da_rodada[i])
     conn.send(str.encode(perda + "EOL"))
 
+time.sleep(1)
+    
+"""
+    FLOP
+    1)Viramos as 3 primeiras cartas na
+    2)Adicionamos as cartas nas maos dos clientes tambem(somente no servidor) para facilitar a verificacao das maos posteriormente
+    3)Enviamos as cartas para o cliente
+    4)Passamos a aposta da rodada como sendo -1 para saber que nao tem nenhuma aposta no inicio
+    5)O primeiro jogador agora eh o que fez o smallBlind no inicio
+    6)Zeramos o array de perdas da rodada 
+    7)Zeramos o array de apostas da rodada somente para os jogadores que nao deram fold em rodadas anteriores. Os que deram tem valor -1 no array
+    8)So podemos passar para a proxima fase quando todas as apostas forem iguais
+"""
+
+#3 primeiras cartas na mesa
+for j in range(0, 3):
+    carta = baralho.sacar_carta()
+    for i in range(0, n_jogadores):
+        conn = clientes[i]
+        maos_clientes[i].append(carta)
+        conn.send(str.encode(str(carta) + "EOL"))
+
+time.sleep(1)
+
+apostaDaRodada = -10
+jogadorDaVez = jogadorSmallBlind
+for i in range(0,n_jogadores):
+    perdas_da_rodada[i] = 0
+    if apostas_clientes[i]!=-1:
+        apostas_clientes[i]=0
+
+while True:
+    if apostas_clientes[jogadorDaVez]==apostaDaRodada:
+        break
+    if apostas_clientes[jogadorDaVez]<0:
+        jogadorDaVez = (jogadorDaVez+1)%n_jogadores
+        continue
+    conn = clientes[jogadorDaVez]
+    conn.send(str.encode("Escolha a jogadaEOL"))
+    jogada = conn.recv(512).decode()
+    if jogada=="bet":
+        if apostaDaRodada==-10:
+            apostaDaRodada = bigBlind
+            apostas_clientes[jogadorDaVez] = apostaDaRodada
+            perdas_da_rodada[jogadorDaVez] = apostaDaRodada
+            jogadorDaVez = (jogadorDaVez+1)%n_jogadores
+            pot+=apostaDaRodada
+        else:
+            conn.send(str.encode("wrongBetEOL"))
+    elif jogada=="call":
+        if apostaDaRodada==-10:
+            conn.send(str.encode("wrongCallEOL"))
+        else:
+            apostas_clientes[jogadorDaVez] = apostaDaRodada
+            jogadorDaVez = (jogadorDaVez+1)%n_jogadores
+            pot+=apostaDaRodada
+            perdas_da_rodada[jogadorDaVez] = apostaDaRodada
+    elif jogada=="raise":
+        if apostaDaRodada==-10:
+            conn.send(str.encode("wrongRaiseEOL"))
+        else:
+            conn.send(str.encode("raiseEOL"))
+            valorRaise = conn.recv(512)
+            while(valorRaise<=apostaDaRodada):
+                conn.send(str.encode("wrongRaiseEOL"))
+                valorRaise = conn.recv(512).decode()
+            apostaDaRodada = valorRaise
+            pot+=apostaDaRodada
+            perdas_da_rodada[jogadorDaVez] = apostaDaRodada
+            jogadorDaVez = (jogadorDaVez+1)%n_jogadores
+    elif jogada=="fold":
+        apostas_clientes[jogadorDaVez]=-1
+        jogadorDaVez = (jogadorDaVez+1)%n_jogadores
+    else:
+        conn.send(str.encode("Jogada invalidaEOL"))
+
+#Descontando as apostas da rodada
+for i in range(0, 3):
+    conn = clientes[i]
+    conn.send(str.encode("Fim da rodadaEOL"))
+    perda = str(perdas_da_rodada[i])
+    conn.send(str.encode(perda + "EOL"))
+
 
 """
     TURN
@@ -306,7 +364,7 @@ for i in range(0, n_jogadores):
 for conn in clientes:
     conn.send(str.encode(str(carta) + "EOL"))
 
-apostaDaRodada = -1
+apostaDaRodada = -10
 jogadorDaVez = jogadorSmallBlind
 for i in range(0,n_jogadores):
     perdas_da_rodada[i] = 0
@@ -323,7 +381,7 @@ while True:
     conn.send(str.encode("Escolha a jogadaEOL"))
     jogada = conn.recv(512).decode()
     if jogada=="bet":
-        if apostaDaRodada==-1:
+        if apostaDaRodada==-10:
             apostaDaRodada = bigBlind
             apostas_clientes[jogadorDaVez] = apostaDaRodada
             perdas_da_rodada[jogadorDaVez] = apostaDaRodada
@@ -332,7 +390,7 @@ while True:
         else:
             conn.send(str.encode("wrongBetEOL"))
     elif jogada=="call":
-        if apostaDaRodada==-1:
+        if apostaDaRodada==-10:
             conn.send(str.encode("wrongCallEOL"))
         else:
             apostas_clientes[jogadorDaVez] = apostaDaRodada
@@ -340,7 +398,7 @@ while True:
             pot+=apostaDaRodada
             perdas_da_rodada[jogadorDaVez] = apostaDaRodada
     elif jogada=="raise":
-        if apostaDaRodada==-1:
+        if apostaDaRodada==-10:
             conn.send(str.encode("wrongRaiseEOL"))
         else:
             conn.send(str.encode("raiseEOL"))

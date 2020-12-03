@@ -22,15 +22,12 @@ s.connect((host, port))
 def receiveCard(s, buf, cardSet):
     if buf.find(endFlag) == -1:
         aux = s.recv(64).decode()
-        print(aux)
         buf += str(aux)
     
     pos = buf.find(endFlag)
     carta = buf[:pos]
-    print(carta)
     cardSet.append(carta)
     buf = buf[pos+3:]
-    print(buf)
     return buf
 
 try:
@@ -39,7 +36,7 @@ try:
     pos = buf.find(endFlag)
     data = buf[:pos]
     buf = buf[pos+3:]
-    print("Received: ", data)
+    # print("Received: ", data)
     if data=="Pronto para jogar":
         print("Comecando o jogo.")
         #Aqui começa o jogo
@@ -51,7 +48,6 @@ try:
             3)So podemos passar para a proxima fase quando todas as apostas forem iguais
             """
             buf = receiveCard(s, buf, mao)
-            print(buf)
             buf = receiveCard(s, buf, mao)
 
             print("Cartas na mao: ", mao)
@@ -166,7 +162,7 @@ try:
                 situacao = buf[:pos]
                 buf = buf[pos+3:]
                 if situacao=="Escolha a jogada":
-                    jogada = input("Escolha qual acao deseja realizar: ")
+                    jogada = input("Escolha qual acao deseja realizar: (digite bet, call, raise ou fold)")
                     s.send(str.encode(jogada))
                 elif situacao=="Jogada invalida":
                     print("Jogada invalida.")
@@ -198,7 +194,16 @@ try:
             1)Recebemos as cartas dos jogadores que ainda estao no jogo
             2)Recebemos as pontuações do servidor
             """
-            
+            if buf.find(endFlag) == -1:
+                aux = s.recv(64).decode()
+                buf += str(aux)
+            pos = buf.find(endFlag)
+            vencedor = buf[:pos]
+            buf = buf[pos+3:]
+
+            print("Vencedor: ", vencedor)
+
+            break
 
     # if data=="Desconectando":
         # break
@@ -207,5 +212,5 @@ except Exception as e:
     print(str(e))
     s.close()
 
-print("Connection lost")
-s.close()
+print("Ending connection")
+s.close()   

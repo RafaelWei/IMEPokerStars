@@ -12,7 +12,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 port = 8080
 host = 'localhost'
   
-result = pyfiglet.figlet_format("Fyre Poker Stars") 
+result = pyfiglet.figlet_format("Poker Fyre Festival") 
 print(result) 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -99,7 +99,6 @@ try:
             while True:
                 if buf.find(endFlag) == -1:
                     aux = s.recv(64).decode()
-                    print(aux)
                     buf += str(aux)
                 pos = buf.find(endFlag)
                 situacao = buf[:pos]
@@ -144,7 +143,6 @@ try:
             while True:
                 if buf.find(endFlag) == -1:
                     aux = s.recv(64).decode()
-                    print(aux)
                     buf += str(aux)
                 pos = buf.find(endFlag)
                 situacao = buf[:pos]
@@ -190,7 +188,6 @@ try:
             while True:
                 if buf.find(endFlag) == -1:
                     aux = s.recv(64).decode()
-                    print(aux)
                     buf += str(aux)
                 pos = buf.find(endFlag)
                 situacao = buf[:pos]
@@ -235,7 +232,7 @@ try:
             vencedor = buf[:pos]
             buf = buf[pos+3:]
 
-            print("Vencedor: ", vencedor)
+            print("Vencedor: jogador ", vencedor)
 
             break
 
